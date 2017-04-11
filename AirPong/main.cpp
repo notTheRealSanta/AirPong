@@ -90,12 +90,14 @@ public:
     float y;
     float vx;
     float vy;
+    float speed;
     int size;
     bool isMoving;
     
     Ball(){
         x = 0;
         y = 0;
+        
         size = 5;
         isMoving = false;
     }
