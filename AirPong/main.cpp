@@ -1,10 +1,4 @@
-//
-//  main.cpp
-//  AirPong
-//
-//  Created by Santosh Rajan on 4/10/17.
-//  Copyright © 2017 Santosh Rajan. All rights reserved.
-//
+
 #include <iostream>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -90,19 +84,22 @@ public:
     float y;
     float vx;
     float vy;
-    float speed;
     int size;
     bool isMoving;
     
     Ball(){
         x = 0;
         y = 0;
-        
+        vx = 3;
+        vy = 2;
         size = 5;
         isMoving = false;
     }
     
     void move(){
+        
+        x += vx;
+        y += vy;
         
     }
     
