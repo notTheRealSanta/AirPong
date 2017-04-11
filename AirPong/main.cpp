@@ -14,9 +14,42 @@ public:
     int width;
     int height;
     
+    int border_x;
+    int border_y;
+    int border_t;
+    
     GameClass(){
-        width = 700;
-        height = 700;
+        width = 800;
+        height = 800;
+        border_x = 600;
+        border_y = 500;
+        border_t = 10;
+    }
+    
+    void draw_border () {
+        
+        glColor3f(0,0,0);
+        glVertex2f(-border_x - border_t,-border_y - border_t);
+        glVertex2f(border_x + border_t,-border_y - border_t);
+        glVertex2f(border_x + border_t,-border_y);
+        glVertex2f(-border_x - border_t,-border_y);
+        
+        glVertex2f(-border_x - border_t,border_y + border_t);
+        glVertex2f(border_x + border_t,border_y + border_t);
+        glVertex2f(border_x + border_t,border_y);
+        glVertex2f(-border_x - border_t,border_y);
+        
+        glVertex2f(-border_x - border_t,-border_y - border_t);
+        glVertex2f(-border_x,-border_y - border_t);
+        glVertex2f(-border_x,border_y + border_t);
+        glVertex2f(-border_x - border_t, border_y + border_t);
+        
+        glVertex2f(border_x,-border_y - border_t);
+        glVertex2f(border_x + border_t,-border_y - border_t);
+        glVertex2f(border_x + border_t,border_y + border_t);
+        glVertex2f(border_x, border_y + border_t);
+
+        
     }
     
 }scene;
@@ -46,11 +79,11 @@ public:
     }
     
     void move_up(){
-        if(y < 300)
+        if(y < scene.border_y - 100)
             y += speed;
     }
     void move_down(){
-        if(y > -300)
+        if(y > -scene.border_y + 100)
             y -= speed;
     }
     
@@ -90,10 +123,26 @@ public:
     Ball(){
         x = 0;
         y = 0;
-        vx = 3;
-        vy = 2;
+        vx = -3;
+        vy = 3;
         size = 5;
         isMoving = false;
+    }
+    
+    void checkBorder(){
+        if(y > scene.border_y || y < -scene.border_y)
+            vy = -vy;
+    }
+    
+    void checkPaddleCollsion(){
+        
+        if(p1.x+10 == x && p1.y-100 < y && p1.y+100 > y){
+            vx = -vx;
+        }
+        else if(p2.x-10 == x && p2.y-100 < y && p2.y+100 > y){
+            vx = -vx;
+        }
+        
     }
     
     void move(){
@@ -101,11 +150,13 @@ public:
         x += vx;
         y += vy;
         
+        checkBorder();
+        checkPaddleCollsion();
     }
     
     void draw(){
         
-        glColor3f(0,0,0);
+        glColor3f(0,0,1);
         glVertex2f(x+size,y+size);
         glVertex2f(x+size,y-size);
         glVertex2f(x-size,y-size);
@@ -122,7 +173,9 @@ void draw () {
     
     glClear(GL_COLOR_BUFFER_BIT);
     glBegin(GL_QUADS);
-
+    
+    scene.draw_border();
+    
     p1.draw();
     p2.draw();
     
@@ -141,9 +194,6 @@ void keyboard(unsigned char key, int x, int y){
     switch (key) {
         case 27:
             exit(0);
-            break;
-        case 'f':
-            glutFullScreen();
             break;
         case 'w':
             p1.up = true;
@@ -197,8 +247,8 @@ void Timer (int value){
 
 void setPaddles(){
     
-    p1.x = -500;
-    p2.x = 500;
+    p1.x = -550;
+    p2.x = 550;
     
 }
 
