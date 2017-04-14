@@ -102,7 +102,7 @@ public:
         x = 0;
         y = 0;
         size = 200;
-        speed = 5;
+        speed = 6;
         up = down = false;
     }
     
@@ -167,7 +167,8 @@ public:
     void checkBorder(){
         if(y > scene.border_y || y < -scene.border_y)
             vy = -vy;
-        if(x > scene.border_x ){
+        
+        if(x < p1.x ){
             vy = -vy;
             x = 0;
             y = 0;
@@ -177,7 +178,7 @@ public:
             scene.pause = true;
             scene.p1_points++;
         }
-        if(x < -scene.border_x ){
+        if(x > p2.x ){
             vy = -vy;
             x = 0;
             y = 0;
