@@ -3,6 +3,8 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #include <GLUT/GLUT.h>
+#include <time.h>
+
 
 using namespace std;
 
@@ -11,6 +13,8 @@ class GameClass{
     
 public:
     
+    bool pause;
+    
     int width;
     int height;
     
@@ -18,12 +22,23 @@ public:
     int border_y;
     int border_t;
     
+    int p1_points;
+    int p2_points;
+    
     GameClass(){
+        
+        pause = true;
+
         width = 800;
         height = 800;
+        
         border_x = 600;
         border_y = 500;
         border_t = 10;
+        
+        p1_points = 0;
+        p2_points = 0;
+    
     }
     
     void draw_border () {
@@ -48,10 +63,27 @@ public:
         glVertex2f(border_x + border_t,-border_y - border_t);
         glVertex2f(border_x + border_t,border_y + border_t);
         glVertex2f(border_x, border_y + border_t);
-
+        
+        
+        for(float i = -border_y; i <= border_y; i += 4*5){
+            glVertex2f(-5,i + 5);
+            glVertex2f(5,i + 5);
+            glVertex2f(5,i - 5);
+            glVertex2f(-5,i - 5);
+        }
+        
+    }
+    void draw_scores(){
+        
+        glColor3f(0, 0, 0);
+        glRasterPos2f(30, 510 + 20);
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '0' + p1_points);
+        glRasterPos2f(-50, 510 + 20);
+        glutBitmapCharacter(GLUT_BITMAP_9_BY_15, '0' + p2_points);
         
     }
     
+
 }scene;
 
 //----------------------- PADDLE CLASS -----------------------//
@@ -117,30 +149,54 @@ public:
     float y;
     float vx;
     float vy;
+    float speed;
     int size;
     bool isMoving;
     
     Ball(){
         x = 0;
         y = 0;
-        vx = -3;
-        vy = 3;
-        size = 5;
-        isMoving = false;
+        speed = 6;
+        srand(time(NULL));
+        vx =  1 + ((double) rand() / (RAND_MAX)) *  speed;
+        vy = speed - vx;
+        cout<<vx<<" "<<vy<<endl;
+        size = 10;
     }
     
     void checkBorder(){
         if(y > scene.border_y || y < -scene.border_y)
             vy = -vy;
+        if(x > scene.border_x ){
+            vy = -vy;
+            x = 0;
+            y = 0;
+            vx =  1 + ((double) rand() / (RAND_MAX)) *  speed;
+            vy = speed - vx;
+            size = 10;
+            scene.pause = true;
+            scene.p1_points++;
+        }
+        if(x < -scene.border_x ){
+            vy = -vy;
+            x = 0;
+            y = 0;
+            vx =  - 1 - ((double) rand() / (RAND_MAX)) *  speed;
+            vy = speed - vx;
+            size = 10;
+            scene.pause = true;
+            scene.p2_points++;
+        }
+
     }
     
     void checkPaddleCollsion(){
         
-        if(p1.x+10 == x && p1.y-100 < y && p1.y+100 > y){
-            vx = -vx;
+        if(p1.x+10 >= x && p1.y-100 < y && p1.y+100 > y){
+            vx = -vx + ((double) rand() / (RAND_MAX)) *  speed /2 ;
         }
-        else if(p2.x-10 == x && p2.y-100 < y && p2.y+100 > y){
-            vx = -vx;
+        else if(p2.x-10 <= x && p2.y-100 < y && p2.y+100 > y){
+            vx = -vx - ((double) rand() / (RAND_MAX)) *  speed /2;
         }
         
     }
@@ -157,10 +213,14 @@ public:
     void draw(){
         
         glColor3f(0,0,1);
+   
+        glBegin(GL_QUADS);
+       
         glVertex2f(x+size,y+size);
         glVertex2f(x+size,y-size);
         glVertex2f(x-size,y-size);
         glVertex2f(x-size,y+size);
+        glEnd();
         
     }
     
@@ -178,10 +238,11 @@ void draw () {
     
     p1.draw();
     p2.draw();
-    
+    glEnd();
     ball.draw();
     
-    glEnd();
+    scene.draw_scores();
+    
     glutSwapBuffers();
 
 }
@@ -191,6 +252,7 @@ void draw () {
 
 void keyboard(unsigned char key, int x, int y){
     
+    scene.pause = false;
     switch (key) {
         case 27:
             exit(0);
@@ -208,7 +270,6 @@ void keyboard(unsigned char key, int x, int y){
             p2.down = true;
             break;
     }
-    //glutPostRedisplay();
 }
 
 void keyboardUp(unsigned char key, int x, int y){
@@ -234,11 +295,11 @@ void keyboardUp(unsigned char key, int x, int y){
 
 void Timer (int value){
     
-    p1.move();
-    p2.move();
-    
-    ball.move();
-    
+    if(!scene.pause){
+        p1.move();
+        p2.move();
+        ball.move();
+    }
     glutPostRedisplay();
     glutTimerFunc(1, Timer, 0);
 }
@@ -270,11 +331,13 @@ void windowSetup(){
 }
 
 int main(int argc, char** argv) {
- 
+    
+    srand(time(NULL));
+    
     glutInit(&argc, argv);
     
     windowSetup();
-  
+    
     setAll();
     
     glutDisplayFunc(draw);
